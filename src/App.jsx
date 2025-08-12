@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Music, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, Shuffle, Repeat } from 'lucide-react';
+import { Upload, Music } from 'lucide-react';
 import AudioPlayer from './components/AudioPlayer';
 import Visualizer from './components/Visualizer';
 import useAudioContext from './hooks/useAudioContext';
@@ -21,16 +21,15 @@ const App = () => {
 
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
-  const { analyser, audioContext, connectAudio, getFrequencyData } = useAudioContext();
+  const { analyser, audioContext, connectAudioElement, getFrequencyData } = useAudioContext();
 
-  // Sample tracks for demo
   const sampleTracks = [
     {
       id: 1,
       title: "Synthwave Dreams",
       artist: "Digital Artist",
       duration: 240,
-      url: null, // Will be generated
+      url: null,
       albumArt: "https://via.placeholder.com/300x300/667eea/ffffff?text=Synthwave"
     },
     {
@@ -82,9 +81,9 @@ const App = () => {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && audioContext && analyser) {
-      connectAudio(audio);
+      connectAudioElement(audio);
     }
-  }, [currentTrack, audioContext, analyser, connectAudio]);
+  }, [currentTrack, audioContext, analyser, connectAudioElement]);
 
   const handleFileUpload = (event) => {
     const files = Array.from(event.target.files);
@@ -197,70 +196,36 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 overflow-hidden">
-      {/* Animated background elements */}
+      {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           className="absolute -top-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -100, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
+          animate={{ x: [0, 100, 0], y: [0, -100, 0] }}
+          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
         />
         <motion.div
           className="absolute -bottom-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-          animate={{
-            x: [0, -100, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
+          animate={{ x: [0, -100, 0], y: [0, 100, 0] }}
+          transition={{ duration: 15, repeat: Infinity, repeatType: "reverse" }}
         />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             Audio Player
           </h1>
           <p className="text-white/70 text-lg">Upload and visualize your music</p>
         </motion.div>
 
-        {/* Main Player Container */}
+        {/* Player & Visualizer */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Visualizer Section */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="glass-card p-6"
-          >
-            <Visualizer
-              analyser={analyser}
-              isPlaying={isPlaying}
-              getFrequencyData={getFrequencyData}
-            />
+          <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6">
+            <Visualizer analyser={analyser} isPlaying={isPlaying} getFrequencyData={getFrequencyData} />
           </motion.div>
 
-          {/* Player Controls Section */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="glass-card p-6"
-          >
+          <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="glass-card p-6">
             <AudioPlayer
               currentTrack={currentTrack}
               playlist={playlist}
@@ -284,16 +249,8 @@ const App = () => {
         </div>
 
         {/* Upload Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="flex justify-center mt-8"
-        >
-          <button
-            onClick={() => setShowUpload(true)}
-            className="glass-button flex items-center gap-2 px-6 py-3 text-white hover:scale-105 transition-all duration-300"
-          >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="flex justify-center mt-8">
+          <button onClick={() => setShowUpload(true)} className="glass-button flex items-center gap-2 px-6 py-3 text-white hover:scale-105 transition-all duration-300">
             <Upload size={20} />
             Upload Music
           </button>
@@ -333,10 +290,7 @@ const App = () => {
                   onChange={handleFileUpload}
                   className="hidden"
                 />
-                <button
-                  onClick={() => setShowUpload(false)}
-                  className="mt-4 w-full glass-button py-2 text-white"
-                >
+                <button onClick={() => setShowUpload(false)} className="mt-4 w-full glass-button py-2 text-white">
                   Cancel
                 </button>
               </motion.div>
