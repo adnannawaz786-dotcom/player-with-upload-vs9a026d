@@ -14,7 +14,7 @@ import {
   Heart,
   MoreHorizontal
 } from 'lucide-react';
-import useAudioContext from '../hooks/useAudioContext';
+import useAudioContext from '../../hooks/useAudioContext';
 
 
 const AudioPlayer = ({ onVisualizerData }) => {
