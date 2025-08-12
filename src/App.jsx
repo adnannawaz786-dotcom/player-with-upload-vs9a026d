@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Music, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, Shuffle, Repeat } from 'lucide-react';
 import AudioPlayer from './components/AudioPlayer';
 import Visualizer from './components/Visualizer';
-import { useAudioContext } from './hooks/useAudioContext';
+import useAudioContext from './hooks/useAudioContext';
 import './styles/glassmorphism.css';
 
 const App = () => {
