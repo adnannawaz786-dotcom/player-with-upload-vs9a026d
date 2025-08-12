@@ -89,25 +89,31 @@ const AudioPlayer = ({ onVisualizerData }) => {
   }, [volume, isMuted]);
 
   const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files);
-    const audioFiles = files.filter(file => file.type.startsWith('audio/'));
-    
-    const newTracks = audioFiles.map((file, index) => ({
-      id: Date.now() + index,
-      name: file.name.replace(/\.[^/.]+$/, ""),
-      artist: 'Unknown Artist',
-      url: URL.createObjectURL(file),
-      duration: 0,
-      file: file
-    }));
+  const files = Array.from(event.target.files);
+  const audioFiles = files.filter(file => file.type.startsWith('audio/'));
+  
+  const newTracks = audioFiles.map((file, index) => ({
+    id: Date.now() + index,
+    name: file.name.replace(/\.[^/.]+$/, ""),
+    artist: 'Unknown Artist',
+    url: URL.createObjectURL(file),
+    duration: 0,
+    file: file
+  }));
 
-    setPlaylist(prev => [...prev, ...newTracks]);
-    
-    if (playlist.length === 0 && newTracks.length > 0) {
+  setPlaylist(prev => {
+    const updatedPlaylist = [...prev, ...newTracks];
+    // If no track selected yet, select first new track:
+    if (prev.length === 0 && newTracks.length > 0) {
       setCurrentTrack(0);
-      loadTrack(0, newTracks);
+      loadTrack(0, updatedPlaylist);
     }
-  };
+    return updatedPlaylist;
+  });
+
+  // Reset file input so same file can be uploaded again if needed
+  event.target.value = null;
+};
 
   const loadTrack = (index, trackList = playlist) => {
     if (trackList[index]) {
