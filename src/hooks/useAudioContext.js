@@ -21,7 +21,6 @@ const useAudioContext = () => {
 
       const context = new (window.AudioContext || window.webkitAudioContext)();
       
-      // Resume context if suspended (required for user interaction)
       if (context.state === 'suspended') {
         await context.resume();
       }
@@ -33,7 +32,6 @@ const useAudioContext = () => {
       const gainNode = context.createGain();
       gainNode.gain.value = 1;
 
-      // Connect nodes
       analyserNode.connect(gainNode);
       gainNode.connect(context.destination);
 
@@ -61,12 +59,10 @@ const useAudioContext = () => {
     }
 
     try {
-      // Disconnect previous source if exists
       if (source) {
         source.disconnect();
       }
 
-      // Create new source from audio element
       const mediaSource = audioContext.createMediaElementSource(audioElement);
       mediaSource.connect(analyser);
       
@@ -81,7 +77,6 @@ const useAudioContext = () => {
     }
   }, [audioContext, analyser, source]);
 
-  // Get frequency data for visualization
   const getFrequencyData = useCallback(() => {
     if (!analyser || !dataArrayRef.current) {
       return new Uint8Array(0);
@@ -91,7 +86,6 @@ const useAudioContext = () => {
     return dataArrayRef.current;
   }, [analyser]);
 
-  // Get time domain data for waveform visualization
   const getTimeDomainData = useCallback(() => {
     if (!analyser || !dataArrayRef.current) {
       return new Uint8Array(0);
@@ -101,19 +95,16 @@ const useAudioContext = () => {
     return dataArrayRef.current;
   }, [analyser]);
 
-  // Set volume (0-1)
   const setVolume = useCallback((volume) => {
     if (gainNodeRef.current) {
       gainNodeRef.current.gain.value = Math.max(0, Math.min(1, volume));
     }
   }, []);
 
-  // Get current volume
   const getVolume = useCallback(() => {
     return gainNodeRef.current ? gainNodeRef.current.gain.value : 1;
   }, []);
 
-  // Apply audio effects
   const applyLowPassFilter = useCallback((frequency = 1000) => {
     if (!audioContext || !source) return;
 
@@ -157,7 +148,6 @@ const useAudioContext = () => {
     }
   }, [source, analyser]);
 
-  // Get audio analysis data
   const getAudioAnalysis = useCallback(() => {
     const frequencyData = getFrequencyData();
     
@@ -176,21 +166,18 @@ const useAudioContext = () => {
     
     let bass = 0, mid = 0, treble = 0, peak = 0;
     
-    // Calculate bass (0-10% of frequency range)
     for (let i = 0; i < bassEnd; i++) {
       bass += frequencyData[i];
       peak = Math.max(peak, frequencyData[i]);
     }
     bass /= bassEnd;
     
-    // Calculate mid (10-50% of frequency range)
     for (let i = bassEnd; i < midEnd; i++) {
       mid += frequencyData[i];
       peak = Math.max(peak, frequencyData[i]);
     }
     mid /= (midEnd - bassEnd);
     
-    // Calculate treble (50-100% of frequency range)
     for (let i = midEnd; i < frequencyData.length; i++) {
       treble += frequencyData[i];
       peak = Math.max(peak, frequencyData[i]);
@@ -208,7 +195,6 @@ const useAudioContext = () => {
     };
   }, [getFrequencyData]);
 
-  // Cleanup function
   const cleanup = useCallback(() => {
     try {
       if (source) {
@@ -231,20 +217,17 @@ const useAudioContext = () => {
     bufferLengthRef.current = 0;
   }, [source, audioContext]);
 
-  // Initialize on mount
   useEffect(() => {
     return () => {
       cleanup();
     };
   }, [cleanup]);
 
-  // Handle audio context state changes
   useEffect(() => {
     if (!audioContext) return;
 
     const handleStateChange = () => {
       if (audioContext.state === 'suspended') {
-        // Try to resume context
         audioContext.resume().catch(console.error);
       }
     };
@@ -257,14 +240,11 @@ const useAudioContext = () => {
   }, [audioContext]);
 
   return {
-    // State
     isInitialized,
     error,
     audioContext,
     analyser,
     bufferLength: bufferLengthRef.current,
-    
-    // Methods
     initializeContext,
     connectAudioElement,
     getFrequencyData,
@@ -276,8 +256,6 @@ const useAudioContext = () => {
     applyHighPassFilter,
     removeFilters,
     cleanup,
-    
-    // Refs for external access
     audioElementRef,
     gainNodeRef
   };
